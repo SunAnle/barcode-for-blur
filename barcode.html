@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+	</head>
+	<body>
+		<input type="text" id="num" value="0" />
+		<p>扫描列表-------------------------------</p>
+		<div id="barcodeList"></div>
+		<p>扫描出现-------------------------------</p>
+		<div id="word"></div>
+		<script src="jquery-3.1.1.min.js"></script>
+		<script>
+			$(function(){
+				var html = '';
+				var html2 = '';
+				var barcode = '';//初始化条码
+				var timestamp = 0;//初始化时间戳
+				var num = $('#num').val();
+				$(document).on('keyup',function(e){
+					if($(':focus').length>0){
+						$(':focus').blur();
+					}
+					//时间戳设置初始值
+					if(timestamp==0){
+						timestamp = Date.parse(new Date());
+					}
+					e = e||event;
+					//获取keyCode
+					var keyCode = e.keyCode ? e.keyCode : e.which ? e.which : e.charCode;
+					//回车事件处理 -> 扫描枪扫完条码后会自动执行一次回车事件
+					if(keyCode == 13){
+						num++
+						html2+="<br>";
+						//根据最新时间戳和初始时间戳进行比对，得出时间差
+						var newTimestamp = Date.parse(new Date()) - timestamp;
+						//判断时间戳差值小于5000，并且条码长度必须大于等于9位
+						if(newTimestamp<5000 && barcode.length>=9){//
+							//条码扫描处理程序
+							console.log(barcode.toUpperCase());
+							$('#num').val(num);
+							$('#barcodeList').html(function(){
+								html+= barcode.toUpperCase()+"<br>"
+								return html;
+							});
+						}
+						//回车事件后，初始化时间戳
+						timestamp = 0;
+						//执行完条码处理后，清空条码
+						barcode='';
+					}else{
+						//扫码过程中，条码keyCode中会出现功能键码，因此需要屏蔽掉
+						if(keyCode != 8 && keyCode != 9  && keyCode != 12 && keyCode != 16 && keyCode != 17 && keyCode != 18 && keyCode != 45 && keyCode !=116 && keyCode !=117 && keyCode !=118 && keyCode != 119 && keyCode != 120 && keyCode != 121 && keyCode != 122 && keyCode != 123){
+							/*
+							 * 屏蔽ctrl+c ctrl+v ctrl+y 等常用快捷键的录入
+							 * if(!(e.ctrlKey && (e.keyCode === 67||e.keyCode === 86||e.keyCode === 89))){
+									barcode+=e.key;
+								}
+							*/
+							barcode+=e.key;
+							$('#word').html(function(){
+								html2 = barcode.toUpperCase()+"&nbsp;&nbsp;&nbsp;&nbsp;"
+								return html2;
+							});
+						}
+					}
+				});
+			});
+		</script>
+	</body>
+</html>
